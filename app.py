@@ -9,30 +9,32 @@ import cs304dbi as dbi
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
 
-# configure DBI
-
-# For Lookup, use 'wmdb'
-# For CRUD and Ajax, use your personal db
-# For project work, use your team db
-
-print(dbi.conf('ww123_db'))
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 @app.route('/')
-def index():
+def home():
     return render_template('main.html', page_title='Main Page')
 
-@app.route('/about/')
-def about():
-    flash('this is a flashed message')
-    return render_template('about.html', page_title='About Us')
+
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        # Process the login form
+        pass
+    return render_template('login.html')
+
+@app.route('/register', methods=['POST'])
+def register():
+    if request.method == 'POST':
+        # Process the registration form
+        pass
+    return render_template('register.html')
 
 if __name__ == '__main__':
     import sys, os
     if len(sys.argv) > 1:
-        # arg, if any, is the desired port number
         port = int(sys.argv[1])
         assert(port>1024)
     else:
