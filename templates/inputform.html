@@ -1,0 +1,71 @@
+-- this is the form that allows users to creae new items/files 
+-- note for others (not angela). I copied my code from forms assignment, so thats why it looks funky 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Input Form - create a new item!</title>
+    <meta name="author" content="Angela Noyes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+    h1{
+        text-align: center;
+        color: orangered;
+        }
+    h2{
+        text-align: center;
+        color: red;
+        }
+    p{
+        color: brown;
+        }
+    #survey-box{
+        background-color: white;
+        width: 300px;
+        border: 6px solid yellow;
+        padding: 50px;
+        margin: 20px;
+        }
+    .name-label{
+        color: green;
+        }
+    .class-label{
+        color: blue;
+        }
+    </style>
+
+</head>
+<body>
+<h1>Create a New Item</h1>    
+<p>askjdnaskjdn</p>
+<p>(I decided to do a favorite color form so that I could make the form itself different colors)</p>
+
+
+
+<form action = "https://cs.wellesley.edu/~cs304flask/cgi-bin/dump.cgi" method = "post">
+-- edit this so that it goes to our database
+
+<div id = "survey-box"> 
+    <label for = "name" class="name-label" >Please provide your name:</label>
+    <input type = "text" name = "name" id = "name" >
+
+    <br><br>
+    <label for ="choice" class="class-label" > This is an important question. Please think carefully before answering. What is your favorite color?: </label>
+    <select name = "choice" id = "choice">
+        <option value = "red">Red</option>
+        <option value = "orange">Orange</option>
+        <option value = "yellow">Yellow</option>
+        <option value = "green">Green</option>
+        <option value = "blue">Blue</option>
+        <option value = "purple">Purple</option>
+    </select>
+ 
+    <br><br>
+
+    <input type = "submit" value = "Submit">
+
+</div>
+</form>
+</body>
+</html>
