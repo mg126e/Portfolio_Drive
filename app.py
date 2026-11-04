@@ -20,9 +20,21 @@ def home():
 
 @app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        # Process the login form
-        pass
+    
+    if request.form.get('username') != '' and request.form.get('password') != '':
+            sql = 'select uid, username from student where username = %s and password = %s;'
+            with dbi.dict_cursor(dbi.connect()) as curs:
+                curs.execute(sql, [request.form.get('username'), request.form.get('password')])
+                user = curs.fetchone()
+        if user is not None:
+            session['uid'] = user['uid']
+            flash('You were successfully logged in', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid username or password', 'error')
+            return redirect(url_for('login'))
+
+    flash('enter username and password', 'error')
     return render_template('login.html')
 
 @app.route('/register', methods=['POST'])
