@@ -1,5 +1,5 @@
--- this is the form that allows users to creae new items/files 
--- note for others. I copied my code from forms assignment, so thats why it looks funky 
+''' This input form allows users to create and upload new items. ''''
+'''note for others. I copied my code from forms assignment, so thats why it looks funky '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,10 +38,17 @@
 </head>
 <body>
 <h1>Create a New Item</h1>    
-<p>askjdnaskjdn</p>
-<p>(I decided to do a favorite color form so that I could make the form itself different colors)</p>
+# here, the pic variable is a dictionary read from the database. 
+# It has two keys, the input_id and the title of the item
+# we need input_id for the URL, and therefore for the url_for function, which refers to our pic(input_id handler function)
+<p><img src="{{url_for('pic', input_id=pic['input_id'])}}" alt="{{pic['title']}}"></p>
 
-
+# I am using code from the file-upload class reading to help with this
+<form method = "post" action="{{url_for('file_upload')}}" enctype="multipart/form-data">
+    <p><label>NM: <input type = "text" name="title" name = "nm"></label></p>
+    <p><label>pic: <input type = "file" name="pic"></label></p>
+    <p><input type = "submit" value = "Submit"></p>
+</form>"
 
 <form action = "https://cs.wellesley.edu/~cs304flask/cgi-bin/dump.cgi" method = "post">
 -- edit this so that it goes to our database
