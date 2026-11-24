@@ -18,32 +18,56 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 @app.route('/')
 def home():
-    return render_template('main.html', page_title='Main Page')
+    if 'username' in session:
+        username = session['username']
+        sid = session['sid']
+        session['visits'] = 1+int(session.get('visits',0))
+        return render_template('main.html', page_title='Main', username=session['username'])
+    else:
+        return render_template('login.html', page_title='Login')
+
+@app.route('/logout/')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
 
 @app.route('/about/')
 def about():
     return render_template('about.html', page_title='About Page')
 
-"""
+
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', page_title='Login')
     else:
         if request.form.get('email') != '' and request.form.get('password') != '':
-            lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi)
+            if lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi):
+                return redirect(url_for('home'))
+            else:
+                return redirect(url_for('login'))
         else:
-            flash('Invalid username or password', 'error')
+            flash('enter all fields', 'error')
             return redirect(url_for('login'))
 
-
-@app.route('/register/', methods=['POST'])
+@app.route('/register/', methods=['POST', 'GET'])
 def register():
-    if request.method == 'POST':
-        # Process the registration form
-        pass
-    return render_template('register.html')
-"""
+    if request.method == 'GET':
+        return render_template('register.html', page_title='Register')
+    else:
+        if request.form.get('email') != '' and request.form.get('password1') != '' and request.form.get('password2') != '':
+            if password1 := request.form.get('password1') != request.form.get('password2'):
+                flash('passwords do not match', 'error')
+                return redirect(url_for('register'))
+            else:
+                if lrh.register_helper(request.form.get('email'), request.form.get('username'), request.form.get('password1'), request.form.get('password2'), dbi):
+                    return redirect(url_for('home'))
+                else:
+                    return redirect(url_for('register'))
+        else:
+            flash('enter all fields', 'error')
+            return redirect(url_for('register'))
+
 @app.route('/query/')
 def search():
     """Search for a given tag or title and display all results.
