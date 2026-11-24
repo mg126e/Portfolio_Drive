@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "baseGreet.html" %}
 
 {% block main_content %}
-<a href="{{url_for('login')}}"> login </a> 
+<a href="{{url_for('register')}}"> register </a> 
 
 <form id="registerform" action="{{url_for('register')}}" method="post">
     <label>Username: <input type="text" name="username" required="" pattern="^\w+$"></label>
