@@ -20,26 +20,28 @@ def home():
     return render_template('main.html', page_title='Main Page')
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login/', methods=['POST', 'GET'])
 def login():
-    
-    if request.form.get('username') != '' and request.form.get('password') != '':
-            sql = 'select uid, username from student where username = %s and password = %s;'
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        if request.form.get('username') != '' and request.form.get('password') != '':
+            sql = 'select sid, username from student where username = %s and password_hash = %s;'
             with dbi.dict_cursor(dbi.connect()) as curs:
-                curs.execute(sql, [request.form.get('username'), request.form.get('password')])
+                curs.execute(sql, [request.form.get('username'), request.form.get('password_hash')])
                 user = curs.fetchone()
-        if user is not None:
-            session['uid'] = user['uid']
-            flash('You were successfully logged in', 'success')
-            return redirect(url_for('home'))
+            if user is not None:
+                session['uid'] = user['uid']
+                flash('You were successfully logged in', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid username or password', 'error')
+                return redirect(url_for('login'))
         else:
-            flash('Invalid username or password', 'error')
+            flash('enter username and password', 'error')
             return redirect(url_for('login'))
 
-    flash('enter username and password', 'error')
-    return render_template('login.html')
-
-@app.route('/register', methods=['POST'])
+@app.route('/register/', methods=['POST'])
 def register():
     if request.method == 'POST':
         # Process the registration form

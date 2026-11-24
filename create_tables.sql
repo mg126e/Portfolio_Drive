@@ -20,6 +20,7 @@ create table student (
     graduation_year int,
     major1 varchar(50), 
     major2 varchar(50),
+    passward_salt varchar(100) not null,
     password_hash varchar(200) not null
 ) engine=InnoDB;
 
