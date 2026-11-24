@@ -29,3 +29,37 @@ def verify_password(password, stored_hash):
         return True, pwd_context.hash(password)
     # Password is okay and does not need updating
     return True, None
+
+def login_helper(email, passwd, dbi):
+    with dbi.connect() as conn:
+        with dbi.dict_cursor(conn) as curs:
+            curs.execute('''SELECT sid, username, email, password_hash
+                            FROM student
+                            WHERE email = %s''',
+                            [email])
+            row = curs.fetchone()
+            if row is None:
+                # Same response as wrong password,
+                # so no information about what went wrong
+                flash('login incorrect. Try again or register')
+                return redirect( url_for('index'))
+            stored = row['password_hash']
+            username = row['username']
+            print('ATTEMPT LOGIN', username)
+            okay, new_hash = verify_password(passwd, stored)
+            if okay:
+                print('they match!')
+                flash('successfully logged in as '+username)
+                session['username'] = username
+                session['uid'] = row['uid']
+                session['logged_in'] = True
+                session['visits'] = 1
+                if new_hash is not None:
+                    curs.execute('''update userpass set password_hash = %s where uid = %s''',
+                                 [new_hash, row['uid']])
+                    conn.commit()
+                # all done; go to user's page
+                return redirect( url_for('user', username=username) )
+            else:
+                flash('login incorrect. Try again or register')
+                return redirect( url_for('index'))
