@@ -8,6 +8,8 @@ app = Flask(__name__)
 import sys, os
 import secrets
 import cs304dbi as dbi
+dbi.conf('projectdrive_db')
+import login_register_helpers as lrh
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -24,14 +26,21 @@ def home():
     return render_template('main.html', page_title='Main Page')
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login/', methods=['POST', 'GET'])
 def login():
-    if request.method == 'POST':
-        # Process the login form
-        pass
-    return render_template('login.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        if request.form.get('email') != '' and request.form.get('password') != '':
+            lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi)
+            else:
+                flash('Invalid username or password', 'error')
+                return redirect(url_for('login'))
+        else:
+            flash('enter username and password', 'error')
+            return redirect(url_for('login'))
 
-@app.route('/register', methods=['POST'])
+@app.route('/register/', methods=['POST'])
 def register():
     if request.method == 'POST':
         # Process the registration form
