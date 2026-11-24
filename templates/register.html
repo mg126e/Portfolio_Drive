@@ -1,6 +1,11 @@
 {% extends "baseGreet.html" %}
+
 {% block nav %}
-<a href="{{url_for('login')}}"> login </a> 
+<nav>
+    <ul>
+        <li><a href="{{url_for('login')}}"> login </a> </li>
+    </ul>
+</nav>
 {% endblock %}
 
 {% block main_content %}

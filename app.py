@@ -39,7 +39,7 @@ def about():
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', page_title='Login')
     else:
         if request.form.get('email') != '' and request.form.get('password') != '':
             if lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi):
@@ -53,7 +53,7 @@ def login():
 @app.route('/register/', methods=['POST', 'GET'])
 def register():
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('register.html', page_title='Register')
     else:
         if request.form.get('email') != '' and request.form.get('password1') != '' and request.form.get('password2') != '':
             if password1 := request.form.get('password1') != request.form.get('password2'):
