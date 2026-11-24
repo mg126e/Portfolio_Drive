@@ -5,8 +5,9 @@ app = Flask(__name__)
 
 import secrets
 import cs304dbi as dbi
-dbi.conf('projectdrive_db')
+print(dbi.conf('projectdrive_db'))
 import login_register_helpers as lrh
+import search
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -30,7 +31,12 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+@app.route('/about/')
+def about():
+    return render_template('about.html', page_title='About Page')
 
+
+"""
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
@@ -62,6 +68,61 @@ def register():
         else:
             flash('enter all fields', 'error')
             return redirect(url_for('register'))
+"""
+@app.route('/query_tag/')
+def search():
+    """Search for a given tag or title and display all results.
+    ***This function ONLY handles search tags and input titles owned by the 
+    logged-in user for this phase"""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to search tags.')
+        return redirect(url_for('home'))
+
+    query_type = request.args.get('search_type')
+    query = request.args.get('query', '').strip()
+    inputs=[]
+    #check the query, if valid, get the tags
+    if query and query_type:
+        with dbi.connect() as conn:
+            #search for the tag
+            if query_type == 'tag':
+                inputs = search.get_tag(conn, query, sid)
+            #search for the title
+            elif query_type == 'title':
+                inputs = search.get_title(conn, query, sid)
+    #if not valid, flash messages
+    else:
+        flash('Enter a valid query or type to search.')
+
+    return render_template(
+        'search.html',
+        page_title='Search by Tag',
+        query=query,
+        query_type=query_type,
+        input=inputs
+    )
+
+@app.route('/display_tag/')
+def display_tag():
+    """Display a user's existing tags, optionally update a tag's name or description"""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to display tags.')
+        return redirect(url_for('home'))
+
+
+@app.route('/delete_tag/')
+def delete_tag():
+    """Delete a tag and removes its links to all of a user's inputs."""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to delete tags.')
+        return redirect(url_for('home'))
+
 
 if __name__ == '__main__':
     import sys, os
