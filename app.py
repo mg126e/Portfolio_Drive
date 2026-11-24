@@ -6,6 +6,7 @@ app = Flask(__name__)
 import secrets
 import cs304dbi as dbi
 print(dbi.conf('projectdrive_db'))
+import login_register_helpers as lrh
 import search
 
 # we need a secret_key to use flash() and sessions
@@ -25,15 +26,8 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        if request.form.get('username') != '' and request.form.get('password') != '':
-            sql = 'select sid, username from student where username = %s and password_hash = %s;'
-            with dbi.dict_cursor(dbi.connect()) as curs:
-                curs.execute(sql, [request.form.get('username'), request.form.get('password_hash')])
-                user = curs.fetchone()
-            if user is not None:
-                session['uid'] = user['uid']
-                flash('You were successfully logged in', 'success')
-                return redirect(url_for('home'))
+        if request.form.get('email') != '' and request.form.get('password') != '':
+            lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi)
             else:
                 flash('Invalid username or password', 'error')
                 return redirect(url_for('login'))

@@ -4,7 +4,8 @@
 <a href="{{url_for('login')}}"> login </a> 
 
 <form id="registerform" action="{{url_for('register')}}" method="post">
-    <label>Username: <input type="text" name="username" required="" pattern="^\w+@\w+\.edu$"></label>
+    <label>email: <input type="text" name="email" required="" pattern="^\w+@\w+\.edu$"></label>
+    <label>Username: <input type="text" name="username" required=""></label>
     <label>Password: <input type="password" name="password" required=""></label>
     <button type="submit">register</button>
 </form>
