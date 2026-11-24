@@ -87,7 +87,6 @@ def register_helper(email, username, password1, password2, dbi):
                 flash(f'try again: {err}')
                 return False
             sid = curs.lastrowid
-            flash(f'FYI, you were issued SID {sid}')
             session['username'] = username
             session['sid'] = sid
             session['logged_in'] = True
