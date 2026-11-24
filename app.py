@@ -20,7 +20,11 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 def home():
     return render_template('main.html', page_title='Main Page')
 
+@app.route('/about/')
+def about():
+    return render_template('about.html', page_title='About Page')
 
+"""
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
@@ -28,12 +32,10 @@ def login():
     else:
         if request.form.get('email') != '' and request.form.get('password') != '':
             lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi)
-            else:
-                flash('Invalid username or password', 'error')
-                return redirect(url_for('login'))
         else:
-            flash('enter username and password', 'error')
+            flash('Invalid username or password', 'error')
             return redirect(url_for('login'))
+
 
 @app.route('/register/', methods=['POST'])
 def register():
@@ -41,7 +43,7 @@ def register():
         # Process the registration form
         pass
     return render_template('register.html')
-
+"""
 @app.route('/query_tag/')
 def search():
     """Search for a given tag or title and display all results.
@@ -59,11 +61,12 @@ def search():
     #check the query, if valid, get the tags
     if query and query_type:
         with dbi.connect() as conn:
-        #search for the tag in database
-        if query_type == 'tag':
-            inputs = search.get_tag(conn, query, sid)
-        elif query_type == 'title':
-            inputs = search.get_title(conn, query, sid)
+            #search for the tag
+            if query_type == 'tag':
+                inputs = search.get_tag(conn, query, sid)
+            #search for the title
+            elif query_type == 'title':
+                inputs = search.get_title(conn, query, sid)
     #if not valid, flash messages
     else:
         flash('Enter a valid query or type to search.')
@@ -72,7 +75,7 @@ def search():
         'search.html',
         page_title='Search by Tag',
         query=query,
-        query_type=query_type
+        query_type=query_type,
         input=inputs
     )
 
