@@ -3,18 +3,18 @@
 insert into student (sid, name, username, email, institution, graduation_year, major1, major2, password_hash)
 values
     (1, 'Hannah Zhao', 'hannah', 'sz108@wellesley.edu',
-     'Wellesley College', 2028, 'Computer Science', 'Mathematics', 'SAMPLE_HASH'),
+     'Wellesley', 2028, 'Computer Science', 'Mathematics', '$argon2id$v=19$m=65536,t=3,p=4$fW/tnXOOcY4xZuw9R8iZ8w$DjZ5FZRwYfQ'),
     (2, 'Alex R', 'alex', 'alex@example.com',
-     'Wellesley College', 2026, 'History', NULL, 'SAMPLE_HASH'),
+     'Wellesley', 2026, 'History', NULL, '$argon2id$v=19$m=65536,t=3,p=4$fW/tnXOOcY4xZuw9R8iZ8w$DjZ5FZRwYfQ'),
     (3, 'Morgan Lee', 'professor_lee', 'morgan@example.com',
-     'Wellesley College', NULL, NULL, NULL, 'SAMPLE_HASH'),
+     'Wellesley', NULL, NULL, NULL, '$argon2id$v=19$m=65536,t=3,p=4$fW/tnXOOcY4xZuw9R8iZ8w$DjZ5FZRwYfQ'),
     (5, 'Marin Gray', 'marin', 'mg126@example.com',
-     'Wellesley College', 2027, 'Computer Science', NULL, 'SAMPLE_HASH');
+     'Wellesley', 2027, 'Computer Science', NULL, '$argon2id$v=19$m=65536,t=3,p=4$fW/tnXOOcY4xZuw9R8iZ8w$DjZ5FZRwYfQ');
     (6, 'Angela Noyes', 'angela', 'an130@wellesley.edu',
-     'Wellesley College', 2029, 'Compter Science', 'Biochemistry', 'SAMPLE_HASH');
+     'Wellesley', 2029, 'Compter Science', 'Biochemistry', '$argon2id$v=19$m=65536,t=3,p=4$fW/tnXOOcY4xZuw9R8iZ8w$DjZ5FZRwYfQ');
     
 insert into course (course_id, course_code, course_name, institution)
-values (1, 'CS304', 'Databases with Web Interfaces', 'Wellesley College');
+values (1, 'CS304', 'Databases with Web Interfaces', 'Wellesley');
 
 insert into course_membership (membership_id, sid, course_id, role, term, date_taken)
 values
