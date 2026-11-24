@@ -1,8 +1,38 @@
-{% extends "base.html" %}
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <!-- for mobile-friendly pages -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name=author content="">
+    <title>{{ page_title }}</title>
+    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+    {% block head_stuff %} {% endblock %}
+</head>
+<body>
 
-{% block main_content %}
+<nav>
+  <ul>
+    <li><a href="{{url_for('logout')}}">logout</a></li>
+  </ul>
+</nav>
+
+
 <h1>Main</h1>
 
 <p>Welcome to our app. This is the main page</p>
 
-{% endblock %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div id="messages">
+  {% for msg in messages %}
+  <p>{{msg}}</p>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+  
+</body>
+</html>
+
