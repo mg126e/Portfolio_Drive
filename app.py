@@ -36,7 +36,6 @@ def about():
     return render_template('about.html', page_title='About Page')
 
 
-"""
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
@@ -68,7 +67,7 @@ def register():
         else:
             flash('enter all fields', 'error')
             return redirect(url_for('register'))
-"""
+
 @app.route('/query_tag/')
 def search():
     """Search for a given tag or title and display all results.
