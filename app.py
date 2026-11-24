@@ -7,7 +7,7 @@ import secrets
 import cs304dbi as dbi
 print(dbi.conf('projectdrive_db'))
 import login_register_helpers as lrh
-import search
+import search as sch
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -44,7 +44,7 @@ def register():
         pass
     return render_template('register.html')
 """
-@app.route('/query_tag/')
+@app.route('/query/')
 def search():
     """Search for a given tag or title and display all results.
     ***This function ONLY handles search tags and input titles owned by the 
@@ -55,18 +55,18 @@ def search():
         flash('Please log in to search tags.')
         return redirect(url_for('home'))
 
-    query_type = request.args.get('search_type')
+    query_type = request.args.get('query_type')
     query = request.args.get('query', '').strip()
-    inputs=[]
+    results=[]
     #check the query, if valid, get the tags
     if query and query_type:
         with dbi.connect() as conn:
             #search for the tag
             if query_type == 'tag':
-                inputs = search.get_tag(conn, query, sid)
+                results = sch.get_tag(conn, query, sid)
             #search for the title
             elif query_type == 'title':
-                inputs = search.get_title(conn, query, sid)
+                results = sch.get_title(conn, query, sid)
     #if not valid, flash messages
     else:
         flash('Enter a valid query or type to search.')
@@ -76,7 +76,7 @@ def search():
         page_title='Search by Tag',
         query=query,
         query_type=query_type,
-        input=inputs
+        results=results
     )
 
 @app.route('/display_tag/')

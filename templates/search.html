@@ -2,5 +2,44 @@
 
 {% block main_content %}
 
+<h1>
+    Search tags or titles:
+</h1>
+<form method="GET" action="{{ url_for('search')}}">
+    <label for="query">Search for:</label>
+    <input type="text" id="query" name="query" required>
+
+    <div class="toggle-group">
+        <input type="radio" id="opt-tag" name="query_type" value="tag" required checked>
+        <label for="opt-tag">Tag</label>
+
+        <input type="radio" id="opt-title" name="query_type" value="title">
+        <label for="opt-title">Title</label>
+    </div>
+
+    <button type="submit">Search</button>
+
+</form>
+
+
+<h2>
+    Results:
+</h2>
+<ol>
+    {% for result in results %}
+    <li>
+        {% if query_type == 'tag' %}
+            <a href="{{url_for('get_person_id', person_id_number=result.nm)}}">
+                {{result.name}}
+            </a>
+        {% else %}
+            <a href="{{url_for('get_movie_id', movie_id_number=result.tt)}}">
+                {{result.title}} ({{result.release}})
+            </a>
+        {% endif %}
+
+    </li>
+    {% endfor %}
+</ol>
 
 {% endblock %}
