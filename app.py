@@ -6,7 +6,7 @@ app = Flask(__name__)
 import secrets
 import cs304dbi as dbi
 print(dbi.conf('projectdrive_db'))
-import tags
+import search
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -47,29 +47,57 @@ def register():
     return render_template('register.html')
 
 @app.route('/query_tag/')
-def search_tag():
-    """Search for a tag and display all resutls or redirect to matches if only one result."""
+def search():
+    """Search for a given tag or title and display all results.
+    ***This function ONLY handles search tags and input titles owned by the 
+    logged-in user for this phase"""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to search tags.')
+        return redirect(url_for('home'))
 
-    tag = request.args.get('tag', '').strip()
+    query_type = request.args.get('search_type')
+    query = request.args.get('query', '').strip()
+    inputs=[]
+    #check the query, if valid, get the tags
+    if query and query_type:
+        with dbi.connect() as conn:
+        #search for the tag in database
+        if query_type == 'tag':
+            inputs = search.get_tag(conn, query, sid)
+        elif query_type == 'title':
+            inputs = search.get_title(conn, query, sid)
+    #if not valid, flash messages
+    else:
+        flash('Enter a valid query or type to search.')
 
-    #check the query, if not valid then re-redender template
-    if not tag:
-        flash('Please enter a valid input')
-        return render_template('search_tag.html')
-    
-    conn = dbi.connect()
-    #search for the tag in database
-    input = tags.get_tag(conn, tag, sid)
+    return render_template(
+        'search.html',
+        page_title='Search by Tag',
+        query=query,
+        query_type=query_type
+        input=inputs
+    )
 
-    #checks looks at how long the list is
-    #if the list is length zero, inform the user
-    if len(input) ==0:
-        return 'Sorry, no input with that tag found...'
-    #if the list is length one, redirect them to the appropriate detail page
-    elif len(result)==1:
-        return redirect(url_for(
-                'get_tag', 
-                tag_id=input[0]['tag_id']))
+@app.route('/display_tag/')
+def display_tag():
+    """Display a user's existing tags, optionally update a tag's name or description"""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to display tags.')
+        return redirect(url_for('home'))
+
+
+@app.route('/delete_tag/')
+def delete_tag():
+    """Delete a tag and removes its links to all of a user's inputs."""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to delete tags.')
+        return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
