@@ -1,4 +1,7 @@
 from passlib.context import CryptContext
+import pymysql
+from flask import (Flask, render_template, url_for,
+                   redirect, flash, session)
 
 pwd_context = CryptContext(
     schemes=["argon2", "bcrypt"],
@@ -42,7 +45,7 @@ def login_helper(email, passwd, dbi):
                 # Same response as wrong password,
                 # so no information about what went wrong
                 flash('login incorrect. Try again or register')
-                return redirect( url_for('index'))
+                return redirect( url_for('login'))
             stored = row['password_hash']
             username = row['username']
             print('ATTEMPT LOGIN', username)
@@ -51,7 +54,7 @@ def login_helper(email, passwd, dbi):
                 print('they match!')
                 flash('successfully logged in as '+username)
                 session['username'] = username
-                session['uid'] = row['uid']
+                session['sid'] = row['sid']
                 session['logged_in'] = True
                 session['visits'] = 1
                 if new_hash is not None:
@@ -59,7 +62,34 @@ def login_helper(email, passwd, dbi):
                                  [new_hash, row['uid']])
                     conn.commit()
                 # all done; go to user's page
-                return redirect( url_for('user', username=username) )
+                return True
             else:
                 flash('login incorrect. Try again or register')
-                return redirect( url_for('index'))
+                return False
+
+def register_helper(email, username, password1, password2, dbi):
+    hashed = hash_password(password1)
+    print('REGISTER', username)
+    # should probably be a helper function
+    with dbi.connect() as conn:
+        with dbi.cursor(conn) as curs:
+            sql = '''SELECT sid FROM student WHERE email = %s'''
+            curs.execute(sql, [email])
+            if curs.fetchone() is not None:
+                flash('email already registered')
+                return False
+            try:
+                curs.execute('''INSERT INTO student(username,email,password_hash, institution)
+                                VALUES(%s,%s,%s,%s)''',
+                                [username, email, hashed, email.split('@')[1].split('.')[0]])
+                conn.commit()
+            except pymysql.IntegrityError as err:
+                flash(f'try again: {err}')
+                return False
+            sid = curs.lastrowid
+            flash(f'FYI, you were issued SID {sid}')
+            session['username'] = username
+            session['sid'] = sid
+            session['logged_in'] = True
+            session['visits'] = 1
+            return True

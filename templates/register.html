@@ -1,12 +1,16 @@
 {% extends "baseGreet.html" %}
+{% block nav %}
+<a href="{{url_for('login')}}"> login </a> 
+{% endblock %}
 
 {% block main_content %}
-<a href="{{url_for('login')}}"> login </a> 
+<h1>Register</h1>
 
 <form id="registerform" action="{{url_for('register')}}" method="post">
-    <label>email: <input type="text" name="email" required="" pattern="^\w+@\w+\.edu$"></label>
+    <label>Email: <input type="text" name="email" required="" pattern="^\w+@\w+\.edu$"></label>
     <label>Username: <input type="text" name="username" required=""></label>
-    <label>Password: <input type="password" name="password" required=""></label>
+    <label>Password: <input type="password" name="password1" required=""></label>
+    <label>Confirm Password: <input type="password" name="password2" required=""></label>
     <button type="submit">register</button>
 </form>
 
