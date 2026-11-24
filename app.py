@@ -68,7 +68,7 @@ def file_upload():
             user_filename = f.filename
             ext = user_filename.split('.')[-1]
             filename = secure_filename(f'{nm}.{ext}')
-            pathname = os.path.join(app.config[UPLOADS'], filename)
+            pathname = os.path.join(app.config['UPLOADS'], filename)
             f.save(pathname)
             with dbi.connect as conn:
                 with dbi.dict_cursor(conn) as curs:
