@@ -155,7 +155,7 @@ def search():
             #search for the title
             else:
                 results = sch.get_input_from_title(conn, sid, query)
-            flash(results)
+            #for testing: flash(results)
     #if not valid, flash messages
     else:
         flash('Enter a valid query or type to search.')
