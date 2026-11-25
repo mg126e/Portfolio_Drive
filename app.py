@@ -41,9 +41,50 @@ def logout():
     """Logs out the user and clears the session. Directing to home redirects to login page"""
     session.clear()
     return redirect(url_for('home'))
-@app.route('/editProfile/')
+
+@app.route('/home/editProfile/', methods=['POST', 'GET'])
 def editProfile():
-    return render_template('editProfile.html', page_title='Edit Profile')
+    if 'username' not in session:
+            flash('Please login to edit your profile.')
+            return redirect(url_for('logout'))
+    if request.method == 'GET':
+        sql = '''SELECT major1, major2, institution FROM student WHERE sid = %s'''
+        sid = session.get('sid')
+        with dbi.connect() as conn:
+            with dbi.dict_cursor(conn) as curs:
+                curs.execute(sql, [sid])
+                row = curs.fetchone()
+                if row is None:
+                    flash('user not found')
+                    return redirect(url_for('logout'))
+                else:
+                    major1 = row['major1']
+                    major2 = row['major2']
+                    if major1 == None or major1 == "none":
+                        major1 = ''
+                    if major2 is None or major2 == "none":
+                        major2 = ''
+                    return render_template('editProfile.html', page_title='Edit Profile', info=row, major1=major1, major2=major2)
+        return render_template('editProfile.html', page_title='Edit Profile')
+    else:
+        sid = session.get('sid')
+        if sid is None:
+            flash('Please log in to edit your profile.')
+            return redirect(url_for('logout'))
+        major1 = request.form.get('major1')
+        major2 = request.form.get('major2')
+        if major1 == '':
+            major1 = None
+        if major2 == '':
+            major2 = None
+        institution = request.form.get('institution')
+        with dbi.connect() as conn:
+            with dbi.cursor(conn) as curs:
+                sql = '''UPDATE student SET major1 = %s, major2 = %s, institution = %s WHERE sid = %s'''
+                curs.execute(sql, [major1, major2, institution, sid])
+                conn.commit()
+                flash('Profile updated successfully.')
+                return redirect(url_for('home'))
 
 @app.route('/about/')
 def about():

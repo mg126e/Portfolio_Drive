@@ -1,0 +1,18 @@
+{% extends "baseGreet.html" %}
+
+{% block main_content %}
+    <h1>Edit Profile</h1>
+    
+    <form method="POST" action="{{ url_for('editProfile') }}">
+        <label for="institution">Institution:</label>
+        <input type="text" id="institution" name="institution" value="{{ info.institution }}"><br><br>
+        
+        <label for="major1">Major 1:</label>
+        <input type="text" id="major1" name="major1" value="{{ major1 }}"><br><br>
+        
+        <label for="major2">Major 2:</label>
+        <input type="text" id="major2" name="major2" value="{{ major2 }}"><br><br>
+        
+        <input type="submit" value="Save Changes">
+
+{% endblock %}
