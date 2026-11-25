@@ -35,7 +35,6 @@ def logout():
 def about():
     return render_template('about.html', page_title='About Page')
 
-
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
@@ -87,10 +86,11 @@ def search():
         with dbi.connect() as conn:
             #search for the tag
             if query_type == 'tag':
-                results = sch.get_tag(conn, query, sid)
+                results = sch.get_input_from_tag(conn, sid, query)
             #search for the title
-            elif query_type == 'title':
-                results = sch.get_title(conn, query, sid)
+            else:
+                results = sch.get_input_from_title(conn, sid, query)
+            flash(results)
     #if not valid, flash messages
     else:
         flash('Enter a valid query or type to search.')
@@ -103,8 +103,13 @@ def search():
         results=results
     )
 
-@app.route('/display_tag/')
-def display_tag():
+@app.route('/view_input/')
+def view_input():
+    """Display a specified user input"""
+    return "This page not implememted but supposed to display an user input."
+
+@app.route('/view_tag/')
+def view_tag():
     """Display a user's existing tags, optionally update a tag's name or description"""
     #get current user
     sid = session.get('sid')
@@ -112,6 +117,7 @@ def display_tag():
         flash('Please log in to display tags.')
         return redirect(url_for('home'))
 
+    return "This page not implememted but supposed to display a tag."
 
 @app.route('/delete_tag/')
 def delete_tag():

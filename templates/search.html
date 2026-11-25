@@ -7,13 +7,15 @@
 </h1>
 <form method="GET" action="{{ url_for('search')}}">
     <label for="query">Search for:</label>
-    <input type="text" id="query" name="query" required>
+    <input type="text" id="query" name="query" value="{{ query }}" required>
 
     <div class="toggle-group">
-        <input type="radio" id="opt-tag" name="query_type" value="tag" required checked>
+        <input type="radio" id="opt-tag" name="query_type" value="tag" required 
+            {% if query_type != 'title' %}checked{% endif %}>
         <label for="opt-tag">Tag</label>
 
-        <input type="radio" id="opt-title" name="query_type" value="title">
+        <input type="radio" id="opt-title" name="query_type" value="title"
+            {% if query_type == 'title' %}checked{% endif %}>
         <label for="opt-title">Title</label>
     </div>
 
@@ -23,23 +25,35 @@
 
 
 <h2>
-    Results:
+    Results
+    {% if query %} 
+        for “{{ query }}”
+    {% endif %}
 </h2>
-<ol>
-    {% for result in results %}
-    <li>
+<div class="result">
+    {% if results %}
         {% if query_type == 'tag' %}
-            <a href="{{url_for('get_person_id', person_id_number=result.nm)}}">
-                {{result.name}}
-            </a>
-        {% else %}
-            <a href="{{url_for('get_movie_id', movie_id_number=result.tt)}}">
-                {{result.title}} ({{result.release}})
-            </a>
+            <p>
+                Inputs associated with 
+                <a href="{{ url_for('view_tag', tag=query) }}">{{ query }}</a>
+            </p>
         {% endif %}
 
-    </li>
-    {% endfor %}
-</ol>
+        <ul>
+            {% for result in results %}
+                <li>
+                    <a href="{{ url_for('view_input', input_id=result.input_id) }}">
+                        {{ result.title }}
+                    </a>
+                    <p>Course ID: {{ result.course_id or 'N/A' }}</p>
+                    <p>Last updated: {{ result.updated_at }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        
+    {% elif query %}
+    <p>No matching inputs found.</p>
+    {% endif %}
+</div>
 
 {% endblock %}
