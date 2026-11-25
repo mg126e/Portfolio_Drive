@@ -1,8 +1,11 @@
+''' This implements item creation and searching '''
+
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
+import sys, os
 import secrets
 import cs304dbi as dbi
 print(dbi.conf('projectdrive_db'))
@@ -15,6 +18,9 @@ app.secret_key = secrets.token_hex()
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
 @app.route('/')
 def home():
@@ -186,6 +192,97 @@ def delete_tag():
         flash('Please log in to delete tags.')
         return redirect(url_for('home'))
 
+
+from datetime import date 
+@app.route('/upload/', methods=['POST', 'GET'])
+def file_upload():
+
+    # the item needs an owner, so the user must be logged in
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to create an item')
+        return redirect(url_for('home'))
+
+    if request.method == 'GET':
+        return render_template('inputform.html')
+
+    # the keys match the name attributes in inputform.html
+    course_number = request.form['course_number']
+    semester = request.form['semester']
+    year = request.form['year']
+    name = request.form['name']
+    description = request.form.get('description', '') # Get description, default to empty string if not provided
+    text_content = request.form.get('text_content', '') # Get text content, default to empty string if not provided
+    tags = sorted({t.strip().lower()
+                for t in request.form.get('tags', '').split(',') if t.strip()}) # Get tags, default to empty string if not provided, split by commas, strip whitespace, convert to lowercase, and sort
+    f = request.files.get('file') 
+    has_file = f is not None and f.filename != ''
+
+    if not has_file and not text_content:
+        flash('Upload a file or paste some text.', 'error')
+        return redirect(url_for('file_upload'))
+
+    term = f'{semester} {year}'
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+
+    original_name = None
+    stored_name = None
+
+    if has_file:
+        original_name = secure_filename(f.filename)
+        # random stored name so that two items with the same file name don't collide
+        stored_name = secrets.token_hex(8) + os.path.splitext(original_name)[1].lower()
+        os.makedirs(app.config['UPLOADS'], exist_ok=True)  # create uploads/ if it's missing
+        f.save(os.path.join(app.config['UPLOADS'], stored_name))
+    
+    curs.execute('select institution from student where sid = %s', [sid])
+    institution = curs.fetchone()['institution']
+    course_code = course_number.strip().upper()
+    curs.execute('select course_id from course where institution = %s and course_code = %s', [institution, course_code])
+    row = curs.fetchone()
+
+    if row:
+        course_id = row['course_id']
+    else:
+        # the form has no course name field so the code is used as the name
+        curs.execute('insert into course(course_code, course_name, institution) values(%s,%s,%s)',
+        [course_code, course_code, institution])
+        course_id = curs.lastrowid
+
+        # record the term
+    curs.execute('''insert into course_membership(sid, course_id, role, term)
+        values (%s, %s, 'student', %s)
+        on duplicate key update membership_id = membership_id''',
+        [sid,course_id,term])
+
+    # the item goes into the input table
+    curs.execute('''insert into input(sid, course_id, title, document, created_at, updated_at)
+        values (%s, %s, %s, %s, now(), now())''',
+        [sid, course_id, name, text_content or None])
+
+    input_id = curs.lastrowid
+
+    # the uploaded file gets its own row in file_attachment
+    if has_file:
+        curs.execute('''insert into file_attachment(input_id, original_filename, storage_key, content_type, file_size, time_uploaded)
+        values (%s, %s, %s, %s, %s, now())''',
+        [input_id, original_name[:100], stored_name, f.mimetype, os.path.getsize(os.path.join(app.config['UPLOADS'], stored_name))])
+
+    # a tag belongs to a student and they can reuse tags. You then link the tag to the item through input_to_tag.
+    for tag in tags:
+        curs.execute('select tag_id from tag where sid = %s and name = %s', [sid, tag])
+        row = curs.fetchone()
+        if row:
+            tag_id = row['tag_id']
+        else:
+            curs.execute('insert into tag(sid, name) values(%s,%s)' [sid, tag])
+            tag_id = curs.lastrowid
+        curs.execute('insert into input_to_tag(sid, name) values (%s,%s)', [input_id, tag_id])
+    conn.commit()
+
+    flash('Successfully created item')
+    return redirect(url_for('file_upload'))  # point this at the item's page once it exists
 
 if __name__ == '__main__':
     import sys, os
