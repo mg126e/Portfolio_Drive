@@ -10,11 +10,11 @@ import secrets
 import cs304dbi as dbi
 print(dbi.conf('projectdrive_db'))
 import login_register_helpers as lrh # handles login and register logic
-import search as sch
+import search as sch # handles search tag and titles
+import file_upload as fuh # handles create input and upload files
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
-
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
@@ -38,7 +38,10 @@ def home():
                     flash('user not found')
                     return redirect(url_for('logout'))
                 else:
-                    return render_template('main.html', page_title='Main', username=session['username'], info=row)
+                    return render_template('main.html', 
+                        page_title='Main', 
+                        username=session['username'], 
+                        info=row)
     else:
         return render_template('login.html', page_title='Login')
 
@@ -53,7 +56,8 @@ def login():
         return render_template('login.html', page_title='Login')
     else:
         if request.form.get('email') != '' and request.form.get('password') != '':
-            if lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi):
+            if lrh.login_helper(request.form.get('email'), 
+            request.form.get('password'), dbi):
                 return redirect(url_for('home'))
             else:
                 return redirect(url_for('login'))
@@ -63,17 +67,21 @@ def login():
 
 @app.route('/register/', methods=['POST', 'GET'])
 def register():
-    """Displays the registration page and handles registration requests. Each user must have a unique email
-    but may have the same username as others. Email must be a college/university email address."""
+    """Displays the registration page and handles registration requests. 
+    Each user must have a unique email but may have the same username as others. 
+    Email must be a college/university email address."""
     if request.method == 'GET':
         return render_template('register.html', page_title='Register')
     else:
-        if request.form.get('email') != '' and request.form.get('password1') != '' and request.form.get('password2') != '':
+        if (request.form.get('email') != ''and request.form.get('password1') != ''
+        and request.form.get('password2') != ''):
             if password1 := request.form.get('password1') != request.form.get('password2'):
                 flash('passwords do not match', 'error')
                 return redirect(url_for('register'))
             else:
-                if lrh.register_helper(request.form.get('email'), request.form.get('username'), request.form.get('password1'), request.form.get('password2'), dbi):
+                if lrh.register_helper(
+                    request.form.get('email'), request.form.get('username'), 
+                    request.form.get('password1'), request.form.get('password2'), dbi):
                     return redirect(url_for('home'))
                 else:
                     return redirect(url_for('register'))
@@ -89,9 +97,10 @@ def logout():
 
 @app.route('/home/editProfile/', methods=['POST', 'GET'])
 def editProfile():
+    '''Edit the profile info'''
     if 'username' not in session:
-            flash('Please login to edit your profile.')
-            return redirect(url_for('logout'))
+        flash('Please login to edit your profile.')
+        return redirect(url_for('logout'))
     if request.method == 'GET':
         sql = '''SELECT major1, major2, institution FROM student WHERE sid = %s'''
         sid = session.get('sid')
@@ -109,7 +118,9 @@ def editProfile():
                         major1 = ''
                     if major2 is None or major2 == "none":
                         major2 = ''
-                    return render_template('editProfile.html', page_title='Edit Profile', info=row, major1=major1, major2=major2)
+                    return render_template('editProfile.html', 
+                        page_title='Edit Profile', info=row, 
+                        major1=major1, major2=major2)
         return render_template('editProfile.html', page_title='Edit Profile')
     else:
         sid = session.get('sid')
@@ -125,7 +136,9 @@ def editProfile():
         institution = request.form.get('institution')
         with dbi.connect() as conn:
             with dbi.cursor(conn) as curs:
-                sql = '''UPDATE student SET major1 = %s, major2 = %s, institution = %s WHERE sid = %s'''
+                sql = '''UPDATE student 
+                    SET major1 = %s, major2 = %s, institution = %s 
+                    WHERE sid = %s'''
                 curs.execute(sql, [major1, major2, institution, sid])
                 conn.commit()
                 flash('Profile updated successfully.')
@@ -171,7 +184,7 @@ def search():
 @app.route('/view_input/')
 def view_input():
     """Display a specified user input"""
-    return "This page not implememted but supposed to display an user input."
+    return render_template('viewInput.html', page_title='View Item')
 
 @app.route('/view_tag/')
 def view_tag():
@@ -197,7 +210,7 @@ def delete_tag():
 from datetime import date 
 @app.route('/upload/', methods=['POST', 'GET'])
 def file_upload():
-
+    '''Display the creation form and handle item submissions.'''
     # the item needs an owner, so the user must be logged in
     sid = session.get('sid')
     if sid is None:
@@ -205,85 +218,61 @@ def file_upload():
         return redirect(url_for('home'))
 
     if request.method == 'GET':
-        return render_template('inputform.html')
+        return render_template('inputform.html', page_title='Create an Item')
 
     # the keys match the name attributes in inputform.html
     course_number = request.form['course_number']
     semester = request.form['semester']
     year = request.form['year']
     name = request.form['name']
-    description = request.form.get('description', '') # Get description, default to empty string if not provided
-    text_content = request.form.get('text_content', '') # Get text content, default to empty string if not provided
+    # Get text content, default to empty string if not provided
+    text_content = request.form.get('text_content', '')
+    # Get tags, default to empty string if not provided, split by commas, strip whitespace, convert to lowercase, and sort
     tags = sorted({t.strip().lower()
-                for t in request.form.get('tags', '').split(',') if t.strip()}) # Get tags, default to empty string if not provided, split by commas, strip whitespace, convert to lowercase, and sort
+        for t in request.form.get('tags', '').split(',') if t.strip()})
+    
     f = request.files.get('file') 
     has_file = f is not None and f.filename != ''
-
     if not has_file and not text_content:
         flash('Upload a file or paste some text.', 'error')
         return redirect(url_for('file_upload'))
 
     term = f'{semester} {year}'
     conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
+    try:
+        with dbi.dict_cursor(conn) as curs:
+            if has_file:
+                original_name, stored_name = fuh.save_file(
+                    f, app.config['UPLOADS'])
 
-    original_name = None
-    stored_name = None
+            # find the course or create a new one
+            course_id = fuh.get_or_create_course(
+                curs, sid, course_number)
 
-    if has_file:
-        original_name = secure_filename(f.filename)
-        # random stored name so that two items with the same file name don't collide
-        stored_name = secrets.token_hex(8) + os.path.splitext(original_name)[1].lower()
-        os.makedirs(app.config['UPLOADS'], exist_ok=True)  # create uploads/ if it's missing
-        f.save(os.path.join(app.config['UPLOADS'], stored_name))
-    
-    curs.execute('select institution from student where sid = %s', [sid])
-    institution = curs.fetchone()['institution']
-    course_code = course_number.strip().upper()
-    curs.execute('select course_id from course where institution = %s and course_code = %s', [institution, course_code])
-    row = curs.fetchone()
+            # record the term
+            fuh.add_course_membership(curs, sid, course_id, term)
 
-    if row:
-        course_id = row['course_id']
-    else:
-        # the form has no course name field so the code is used as the name
-        curs.execute('insert into course(course_code, course_name, institution) values(%s,%s,%s)',
-        [course_code, course_code, institution])
-        course_id = curs.lastrowid
+            #item goes into the input table
+            input_id = fuh.create_item(
+                curs, sid, course_id, name, text_content)
 
-        # record the term
-    curs.execute('''insert into course_membership(sid, course_id, role, term)
-        values (%s, %s, 'student', %s)
-        on duplicate key update membership_id = membership_id''',
-        [sid,course_id,term])
+            # uploaded file gets its own row in file_attachment
+            if has_file:
+                fuh.add_file_attachment(
+                    curs, input_id, original_name, stored_name,
+                    f.mimetype, app.config['UPLOADS'])
 
-    # the item goes into the input table
-    curs.execute('''insert into input(sid, course_id, title, document, created_at, updated_at)
-        values (%s, %s, %s, %s, now(), now())''',
-        [sid, course_id, name, text_content or None])
+            # link the tags to the item
+            fuh.add_tags(curs, sid, input_id, tags)
+            conn.commit()
+    except Exception:
+        conn.rollback()
+        conn.close()
+        raise
 
-    input_id = curs.lastrowid
-
-    # the uploaded file gets its own row in file_attachment
-    if has_file:
-        curs.execute('''insert into file_attachment(input_id, original_filename, storage_key, content_type, file_size, time_uploaded)
-        values (%s, %s, %s, %s, %s, now())''',
-        [input_id, original_name[:100], stored_name, f.mimetype, os.path.getsize(os.path.join(app.config['UPLOADS'], stored_name))])
-
-    # a tag belongs to a student and they can reuse tags. You then link the tag to the item through input_to_tag.
-    for tag in tags:
-        curs.execute('select tag_id from tag where sid = %s and name = %s', [sid, tag])
-        row = curs.fetchone()
-        if row:
-            tag_id = row['tag_id']
-        else:
-            curs.execute('insert into tag(sid, name) values(%s,%s)' [sid, tag])
-            tag_id = curs.lastrowid
-        curs.execute('insert into input_to_tag(sid, name) values (%s,%s)', [input_id, tag_id])
-    conn.commit()
-
+    conn.close()
     flash('Successfully created item')
-    return redirect(url_for('file_upload'))  # point this at the item's page once it exists
+    return redirect(url_for('file_upload'))# point this at the item's page once it exists
 
 if __name__ == '__main__':
     import sys, os

@@ -120,5 +120,31 @@ form {
     gap: 30px;
 }
 
-
-
+#upload-form {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 650px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 24px;
+    gap: 20px;
+    border-radius: 12px;
+}
+#upload-form p {
+    margin: 0;
+}
+#upload-form label {
+    display: block;
+}
+#upload-form input:not([type="submit"]):not([type="file"]),
+#upload-form select,
+#upload-form textarea {
+    padding: 8px 10px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    font: inherit;
+}
+#upload-form textarea {
+    resize: vertical;
+}

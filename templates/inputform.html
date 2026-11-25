@@ -1,20 +1,11 @@
-<!DOCTYPE html>
+{% extends "baseGreet.html" %}
+{% block main_content %}
 
-<!-- This input form allows users to create and upload new items. -->
-
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Create a New Item</title>
-    <meta name="author" content="Angela Noyes">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
 <h1>Create a New Item</h1>    
 
-
 <!-- I am using code from the file-upload class reading to help with this -->
-<form method="post" action="{{url_for('file_upload')}}" enctype="multipart/form-data">
+<form id="upload-form" method="post" action="{{ url_for('file_upload') }}"
+      enctype="multipart/form-data">
 
     <!-- For now, I am using the "structural" method for adding labels-->
 
@@ -49,11 +40,6 @@
         <input required type = "text" name="name" placeholder="e.g. Lab 9 (Rate of Photosynthesis)">
     </label></p>
 
-    <p><label>Description:
-        <textarea name="description" rows="5" cols="50" 
-            placeholder="e.g. Oil on canvas, 16x20"></textarea>
-    </label></p>
-
     <p><label>Tags (separate with commas):
         <input type = "text" name="tags" placeholder="e.g. SQL, lab procedure, Python">
     </label></p>
@@ -74,6 +60,4 @@
        height="31" width="88">
   </a> 
 </p>
-
-</body>
-</html>
+{% endblock %}

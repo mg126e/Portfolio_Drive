@@ -1,4 +1,4 @@
---This SQL file inserts a few sample data into our database to show how each table works.
+-- This SQL file inserts a few sample data into our database to show how each table works.
 
 insert into student (sid, username, email, institution, graduation_year,
      major1, major2, password_hash)

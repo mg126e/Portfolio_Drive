@@ -1,4 +1,4 @@
---This SQL files creates tables for out shared group database.
+-- This SQL files creates tables for out shared group database.
 
 -- Drop existing tables
 drop table if exists input_to_tag;
