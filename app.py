@@ -6,7 +6,7 @@ app = Flask(__name__)
 import secrets
 import cs304dbi as dbi
 print(dbi.conf('projectdrive_db'))
-import login_register_helpers as lrh
+import login_register_helpers as lrh # handles login and register logic
 import search as sch
 
 # we need a secret_key to use flash() and sessions
@@ -18,6 +18,7 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 @app.route('/')
 def home():
+    '''Displays the home page when user logs in, otherwise displays the login page.'''
     if 'username' in session:
         username = session['username']
         sid = session['sid']
@@ -28,6 +29,7 @@ def home():
 
 @app.route('/logout/')
 def logout():
+    """Logs out the user and clears the session. Directing to home redirects to login page"""
     session.clear()
     return redirect(url_for('home'))
 
@@ -37,6 +39,7 @@ def about():
 
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
+    '''Displays the login page and handles login requests.'''
     if request.method == 'GET':
         return render_template('login.html', page_title='Login')
     else:
@@ -51,6 +54,8 @@ def login():
 
 @app.route('/register/', methods=['POST', 'GET'])
 def register():
+    """Displays the registration page and handles registration requests. Each user must have a unique email
+    but may have the same username as others. Email must be a college/university email address."""
     if request.method == 'GET':
         return render_template('register.html', page_title='Register')
     else:
