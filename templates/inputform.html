@@ -1,79 +1,69 @@
-''' This input form allows users to create and upload new items. ''''
-'''note for others. I copied my code from forms assignment, so thats why it looks funky '''
 <!DOCTYPE html>
+
+<!-- This input form allows users to create and upload new items. -->
+
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Input Form - create a new item!</title>
+    <title>Create a New Item</title>
     <meta name="author" content="Angela Noyes">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style>
-    h1{
-        text-align: center;
-        color: orangered;
-        }
-    h2{
-        text-align: center;
-        color: red;
-        }
-    p{
-        color: brown;
-        }
-    #survey-box{
-        background-color: white;
-        width: 300px;
-        border: 6px solid yellow;
-        padding: 50px;
-        margin: 20px;
-        }
-    .name-label{
-        color: green;
-        }
-    .class-label{
-        color: blue;
-        }
-    </style>
-
 </head>
 <body>
 <h1>Create a New Item</h1>    
-<!-- here, the pic variable is a dictionary read from the database. -->
-<!-- It has two keys, the input_id and the title of the item -->
-<!-- we need input_id for the URL, and therefore for the url_for function, which refers to our pic(input_id handler function) -->
-<p><img src="{{url_for('pic', input_id=pic['input_id'])}}" alt="{{pic['title']}}"></p>
+
 
 <!-- I am using code from the file-upload class reading to help with this -->
-<form method = "post" action="{{url_for('file_upload')}}" enctype="multipart/form-data">
-    <p><label>NM: <input type = "text" name="title" name = "nm"></label></p>
-    <p><label>pic: <input type = "file" name="pic"></label></p>
-    <p><input type = "submit" value = "Submit"></p>
-</form>"
+<form method="post" action="{{url_for('file_upload')}}" enctype="multipart/form-data">
+
+    <!-- For now, I am using the "structural" method for adding labels-->
+
+    <p><label>Course Number: 
+        <input required type = "text" name="course_number" placeholder="e.g. CS304">
+    </label></p>
+
+    <p><label>Semester: 
+        <select required name="semester">
+        <option value = "">choose semester</option>
+        <!-- should the instructions in the line above be "choose semester" or "choose term" or something else? Diff institutions will be different-->
+        <option>Fall</option>
+        <option>Spring</option>
+        <option>Summer</option>
+        <option>Winter</option>
+        </select>
+    </label></p>
+
+    <p><label>Year: 
+        <input required type="number" name="year" min="2000">
+    </label></p>
+
+    <p><label>Upload a file:
+        <input type="file" name="file">
+    </label></p>
+
+    <p><label>Or paste text: <br>
+        <textarea name="text_content" rows="10" cols="50"></textarea>
+    </label></p>
+
+    <p><label>Name:
+        <input required type = "text" name="name" placeholder="e.g. Lab 9 (Rate of Photosynthesis)">
+    </label></p>
+
+    <p><label>Description:
+        <textarea name="description" rows="5" cols="50" 
+            placeholder="e.g. Oil on canvas, 16x20"></textarea>
+    </label></p>
+
+    <p><label>Tags (separate with commas):
+        <input type = "text" name="tags" placeholder="e.g. SQL, lab procedure, Python">
+    </label></p>
+
+    <p><input type = "submit" value = "Create"></p>
+    <!-- This is the submit button-->
+</form>
 
 <!-- <form action = "https://cs.wellesley.edu/~cs304flask/cgi-bin/dump.cgi" method = "post"> -->
 <!-- I have commented out the above for now because I'm not sure if it's needed. If it is needed, the address would need to be different -->
-
-<div id = "survey-box"> 
-    <!-- I am trying to use Labeling using ID-->
-    <label for = "Course-ID" class="name-label" >Please provide the course number associated with this item:</label>
-    <input type = "text" class = "course" id = "course" >
-    <label for = "name" class="name-label" >If you would like to associate this item with a semester and/or year, please provide it here:</label>
-    <input type = "text" semester = "semester" id = "semester" >
-    <input type = "text" year = "year" id = "year" >
-
-    <br><br>
-    <label for ="choice" class="class-label" > What type of object(s) would you like to create? </label>
-    <select name = "choice" id = "choice">
-        <option value = "text file">textfile</option>
-        <option value = "image">image</option>
-    </select>
- 
-    <br><br>
-
-    <input type = "submit" value = "Submit">
-
-</div>
-</form>
 
 <p>
   <a href="http://validator.w3.org/check?uri=referer">
