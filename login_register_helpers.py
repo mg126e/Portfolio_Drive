@@ -76,7 +76,7 @@ def register_helper(email, username, password1, password2, dbi):
             sql = '''SELECT sid FROM student WHERE email = %s'''
             curs.execute(sql, [email])
             if curs.fetchone() is not None:
-                flash('email already registered')
+                flash('email already registered, login or use a different email')
                 return False
             try:
                 curs.execute('''INSERT INTO student(username,email,password_hash, institution)
