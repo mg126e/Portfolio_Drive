@@ -6,7 +6,7 @@ Portfolio Drive is a Flask web app for storing and organizing "items" such as la
 
 What you need:
 Activate the CS304 virtual environment 
-The packages in 'requirements.txt' (passlib is used in login_register_helpers.py)
+The packages in 'requirements.txt' 
 
 Setup:
 1. get the code and go into the porject folder:
