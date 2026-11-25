@@ -10,8 +10,14 @@
 
 {% if info.major2 is not none %}
     <p>Majors: {{ info.major1 }}, {{ info.major2 }}</p>
+    <button type="button" onclick="editProfile()" style="border-radius: 20px;">
+        <img src="{{ url_for('static', filename='image/pencil.svg') }}" alt="pencil to edit" width="20" height="20">
+    </button>
 {% else %}
-    <p>Major: {{ info.major1 }}</p>
+    <p>Major: {{ info.major1 }}</p> 
+    <button type="button" onclick="editProfile()" style="border-radius: 20px;">
+        <img src="{{ url_for('static', filename='image/pencil.svg') }}" alt="pencil to edit" width="20" height="20">
+    </button>
 {% endif %}
 
 {% endblock %}

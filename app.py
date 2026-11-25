@@ -41,6 +41,9 @@ def logout():
     """Logs out the user and clears the session. Directing to home redirects to login page"""
     session.clear()
     return redirect(url_for('home'))
+@app.route('/editProfile/')
+def editProfile():
+    return render_template('editProfile.html', page_title='Edit Profile')
 
 @app.route('/about/')
 def about():
