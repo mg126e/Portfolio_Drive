@@ -36,6 +36,45 @@ def home():
     else:
         return render_template('login.html', page_title='Login')
 
+@app.route('/about/')
+def about():
+    return render_template('about.html', page_title='About Page')
+
+@app.route('/login/', methods=['POST', 'GET'])
+def login():
+    '''Displays the login page and handles login requests.'''
+    if request.method == 'GET':
+        return render_template('login.html', page_title='Login')
+    else:
+        if request.form.get('email') != '' and request.form.get('password') != '':
+            if lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi):
+                return redirect(url_for('home'))
+            else:
+                return redirect(url_for('login'))
+        else:
+            flash('enter all fields', 'error')
+            return redirect(url_for('login'))
+
+@app.route('/register/', methods=['POST', 'GET'])
+def register():
+    """Displays the registration page and handles registration requests. Each user must have a unique email
+    but may have the same username as others. Email must be a college/university email address."""
+    if request.method == 'GET':
+        return render_template('register.html', page_title='Register')
+    else:
+        if request.form.get('email') != '' and request.form.get('password1') != '' and request.form.get('password2') != '':
+            if password1 := request.form.get('password1') != request.form.get('password2'):
+                flash('passwords do not match', 'error')
+                return redirect(url_for('register'))
+            else:
+                if lrh.register_helper(request.form.get('email'), request.form.get('username'), request.form.get('password1'), request.form.get('password2'), dbi):
+                    return redirect(url_for('home'))
+                else:
+                    return redirect(url_for('register'))
+        else:
+            flash('enter all fields', 'error')
+            return redirect(url_for('register'))
+
 @app.route('/logout/')
 def logout():
     """Logs out the user and clears the session. Directing to home redirects to login page"""
@@ -86,44 +125,6 @@ def editProfile():
                 flash('Profile updated successfully.')
                 return redirect(url_for('home'))
 
-@app.route('/about/')
-def about():
-    return render_template('about.html', page_title='About Page')
-
-@app.route('/login/', methods=['POST', 'GET'])
-def login():
-    '''Displays the login page and handles login requests.'''
-    if request.method == 'GET':
-        return render_template('login.html', page_title='Login')
-    else:
-        if request.form.get('email') != '' and request.form.get('password') != '':
-            if lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi):
-                return redirect(url_for('home'))
-            else:
-                return redirect(url_for('login'))
-        else:
-            flash('enter all fields', 'error')
-            return redirect(url_for('login'))
-
-@app.route('/register/', methods=['POST', 'GET'])
-def register():
-    """Displays the registration page and handles registration requests. Each user must have a unique email
-    but may have the same username as others. Email must be a college/university email address."""
-    if request.method == 'GET':
-        return render_template('register.html', page_title='Register')
-    else:
-        if request.form.get('email') != '' and request.form.get('password1') != '' and request.form.get('password2') != '':
-            if password1 := request.form.get('password1') != request.form.get('password2'):
-                flash('passwords do not match', 'error')
-                return redirect(url_for('register'))
-            else:
-                if lrh.register_helper(request.form.get('email'), request.form.get('username'), request.form.get('password1'), request.form.get('password2'), dbi):
-                    return redirect(url_for('home'))
-                else:
-                    return redirect(url_for('register'))
-        else:
-            flash('enter all fields', 'error')
-            return redirect(url_for('register'))
 
 @app.route('/query/')
 def search():
