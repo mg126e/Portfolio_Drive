@@ -23,7 +23,16 @@ def home():
         username = session['username']
         sid = session['sid']
         session['visits'] = 1+int(session.get('visits',0))
-        return render_template('main.html', page_title='Main', username=session['username'])
+        sql = '''SELECT * FROM student WHERE sid = %s'''
+        with dbi.connect() as conn:
+            with dbi.dict_cursor(conn) as curs:
+                curs.execute(sql, [sid])
+                row = curs.fetchone()
+                if row is None:
+                    flash('user not found')
+                    return redirect(url_for('logout'))
+                else:
+                    return render_template('main.html', page_title='Main', username=session['username'], info=row)
     else:
         return render_template('login.html', page_title='Login')
 

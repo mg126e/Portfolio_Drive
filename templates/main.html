@@ -2,8 +2,16 @@
 
 {% block main_content %}
 
-<h1>Main</h1>
+<h1>Home</h1>
 
-<p>Welcome to our app. This is the main page</p>
+<p>Welcome {{ info.username }}</p>
+<p>Email: {{ info.email }}</p>
+<p>Institution: {{ info.institution }}</p>
+
+{% if info.major2 is not none %}
+    <p>Majors: {{ info.major1 }}, {{ info.major2 }}</p>
+{% else %}
+    <p>Major: {{ info.major1 }}</p>
+{% endif %}
 
 {% endblock %}
