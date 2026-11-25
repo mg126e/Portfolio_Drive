@@ -8,8 +8,9 @@ app = Flask(__name__)
 import sys, os
 import secrets
 import cs304dbi as dbi
-dbi.conf('projectdrive_db')
+print(dbi.conf('projectdrive_db'))
 import login_register_helpers as lrh
+import search as sch
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -23,29 +24,116 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
 @app.route('/')
 def home():
-    return render_template('main.html', page_title='Main Page')
+    if 'username' in session:
+        username = session['username']
+        sid = session['sid']
+        session['visits'] = 1+int(session.get('visits',0))
+        return render_template('main.html', page_title='Main', username=session['username'])
+    else:
+        return render_template('login.html', page_title='Login')
 
+@app.route('/logout/')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+@app.route('/about/')
+def about():
+    return render_template('about.html', page_title='About Page')
 
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', page_title='Login')
     else:
         if request.form.get('email') != '' and request.form.get('password') != '':
-            lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi)
+            if lrh.login_helper(request.form.get('email'), request.form.get('password'), dbi):
+                return redirect(url_for('home'))
             else:
-                flash('Invalid username or password', 'error')
                 return redirect(url_for('login'))
         else:
-            flash('enter username and password', 'error')
+            flash('enter all fields', 'error')
             return redirect(url_for('login'))
 
-@app.route('/register/', methods=['POST'])
+@app.route('/register/', methods=['POST', 'GET'])
 def register():
-    if request.method == 'POST':
-        # Process the registration form
-        pass
-    return render_template('register.html')
+    if request.method == 'GET':
+        return render_template('register.html', page_title='Register')
+    else:
+        if request.form.get('email') != '' and request.form.get('password1') != '' and request.form.get('password2') != '':
+            if password1 := request.form.get('password1') != request.form.get('password2'):
+                flash('passwords do not match', 'error')
+                return redirect(url_for('register'))
+            else:
+                if lrh.register_helper(request.form.get('email'), request.form.get('username'), request.form.get('password1'), request.form.get('password2'), dbi):
+                    return redirect(url_for('home'))
+                else:
+                    return redirect(url_for('register'))
+        else:
+            flash('enter all fields', 'error')
+            return redirect(url_for('register'))
+
+@app.route('/query/')
+def search():
+    """Search for a given tag or title and display all results.
+    ***This function ONLY handles search tags and input titles owned by the 
+    logged-in user for this phase"""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to search tags.')
+        return redirect(url_for('home'))
+
+    query_type = request.args.get('query_type')
+    query = request.args.get('query', '').strip()
+    results=[]
+    #check the query, if valid, get the tags
+    if query and query_type:
+        with dbi.connect() as conn:
+            #search for the tag
+            if query_type == 'tag':
+                results = sch.get_input_from_tag(conn, sid, query)
+            #search for the title
+            else:
+                results = sch.get_input_from_title(conn, sid, query)
+            flash(results)
+    #if not valid, flash messages
+    else:
+        flash('Enter a valid query or type to search.')
+
+    return render_template(
+        'search.html',
+        page_title='Search by Tag',
+        query=query,
+        query_type=query_type,
+        results=results
+    )
+
+@app.route('/view_input/')
+def view_input():
+    """Display a specified user input"""
+    return "This page not implememted but supposed to display an user input."
+
+@app.route('/view_tag/')
+def view_tag():
+    """Display a user's existing tags, optionally update a tag's name or description"""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to display tags.')
+        return redirect(url_for('home'))
+
+    return "This page not implememted but supposed to display a tag."
+
+@app.route('/delete_tag/')
+def delete_tag():
+    """Delete a tag and removes its links to all of a user's inputs."""
+    #get current user
+    sid = session.get('sid')
+    if sid is None:
+        flash('Please log in to delete tags.')
+        return redirect(url_for('home'))
+
 
 from datetime import date 
 @app.route('/upload/', methods=['POST', 'GET'])

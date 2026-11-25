@@ -11,11 +11,11 @@
 */
 
 HTML {
-    --color-header: #0073e6;  /* for H1-H6 and nav buttons. */
-    --color-focus: #5ba300;   /* for focussed elements and mouseover on nav */
+    --color-header: #121212;  /* for H1-H6 and nav buttons. */
     --color-alert: #b51963;   /* for flashed messages and such. */
     --color-nav-fg: white;    /* foreground color of nav text. */
-    --font-family: Verdana;
+    --font-family: monospace;
+    --nav-color: #DFDFDF;
     font-family: var(--font-family)
 }
 
@@ -29,60 +29,83 @@ HTML {
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--color-header);
+    font-size: 2em;
 }
 
 h1 {
     font-size: 200%;
 }
-    
 
-/* for a simple navbar. Talk to Scott if you want drop-downs. */
-nav > ul {
-    display: flex;
-    flex-direction: row;
+nav {
+ width: 100%;
+ display: flex;
+ border-bottom: 2px solid  var(--nav-color);
+ justify-content: flex-start;
+ align-items: center;
+ 
 }
 
-nav ul {
-    list-style-type: none;
-    margin: 0px;
-    padding: 0px;
+nav > ul {
+ display: flex;
+ flex-direction: row;
+ gap: 15px;
+ margin: 0px;
+ padding: 0px;
+ list-style-type: none;
+ padding: 10px;
+ border-radius: 5px;
 }
 
 nav > ul > li {
+    display: flex;
+    align-items: center;
     flex: 0 0 auto;
-    width: 15em; 
-}
-
-nav button, nav a {
-    display: block;
-    box-sizing: border-box; /* easier to make button and A the same size */
-    width: 100%;
-    height: 40px;
-    padding: 0px;
-    padding-bottom: 5px;
     background-color: var(--color-header);
-    color: var(--color-nav-fg);
-    border: 2px solid black;
-    border-radius: 5px;
-    cursor: pointer;
-    /* Firefox uses font -apple-system unless I repeat the font spec here. */
-    font-family: var(--font-family);
-    font-weight: bold;
-    font-size: 1.4rem;
+    width: fit-content; 
+    height: 3em;
+    padding: 0px 15px;
+    border-radius: 10px;
+    background-color: var(--nav-color);
 }
 
-/* Only the top-level buttons are centered; lower ones are left-aligned. */
-nav > ul > li > button , nav > ul > li > a {
+nav a{
     text-align: center;
+    text-decoration: none;
+    color: var(--color-header);
+    font-family: monospace;
+    font-size: 1.25rem;
 }
 
-/* because of the margin trick, this can only be used for the last element */
+nav li:hover, nav li:focus-within {
+    background-color: var(--color-header);
 
-nav li.right {
-    margin-left: auto;
+    > a {
+        color: var(--color-nav-fg);
+    }
 }
 
-nav button:hover, button:focus, nav a:hover, nav a:focus {
-    background-color: var(--color-focus);
+button {
+    font-family: monospace;
+    font-size: 1.25rem;
+    background-color: var(--nav-color);
+    color: var(--color-header);
+    border-radius: 10px;
+    padding: 0px 15px;
+    height: 2em;
+    border: none;
+}
+
+form {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: fit-content;
+    margin: 0 auto;
+    background-color: #b2dbbf;
+    border-radius: 10px;
+    padding: 30px;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
 }
 
