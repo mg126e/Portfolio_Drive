@@ -12,6 +12,7 @@ print(dbi.conf('projectdrive_db'))
 import login_register_helpers as lrh # handles login and register logic
 import search as sch # handles search tag and titles
 import file_upload as fuh # handles create input and upload files
+import edit_profile as eph # handles edit profile
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -102,26 +103,22 @@ def editProfile():
         flash('Please login to edit your profile.')
         return redirect(url_for('logout'))
     if request.method == 'GET':
-        sql = '''SELECT major1, major2, institution FROM student WHERE sid = %s'''
         sid = session.get('sid')
         with dbi.connect() as conn:
-            with dbi.dict_cursor(conn) as curs:
-                curs.execute(sql, [sid])
-                row = curs.fetchone()
-                if row is None:
-                    flash('user not found')
-                    return redirect(url_for('logout'))
-                else:
-                    major1 = row['major1']
-                    major2 = row['major2']
-                    if major1 == None or major1 == "none":
-                        major1 = ''
-                    if major2 is None or major2 == "none":
-                        major2 = ''
-                    return render_template('editProfile.html', 
-                        page_title='Edit Profile', info=row, 
-                        major1=major1, major2=major2)
-        return render_template('editProfile.html', page_title='Edit Profile')
+            row = eph.get_profile(conn, sid)
+            if row is None:
+                flash('user not found')
+                return redirect(url_for('logout'))
+            else:
+                major1 = row['major1']
+                major2 = row['major2']
+                if major1 == None or major1 == "none":
+                    major1 = ''
+                if major2 is None or major2 == "none":
+                    major2 = ''
+                return render_template('editProfile.html',
+                    page_title='Edit Profile', info=row,
+                    major1=major1, major2=major2)
     else:
         sid = session.get('sid')
         if sid is None:
@@ -135,14 +132,10 @@ def editProfile():
             major2 = None
         institution = request.form.get('institution')
         with dbi.connect() as conn:
-            with dbi.cursor(conn) as curs:
-                sql = '''UPDATE student 
-                    SET major1 = %s, major2 = %s, institution = %s 
-                    WHERE sid = %s'''
-                curs.execute(sql, [major1, major2, institution, sid])
-                conn.commit()
-                flash('Profile updated successfully.')
-                return redirect(url_for('home'))
+            eph.update_profile(conn, sid, major1, major2, institution)
+            conn.commit()
+            flash('Profile updated successfully.')
+            return redirect(url_for('home'))
 
 
 @app.route('/query/')

@@ -5,7 +5,7 @@ import secrets
 from werkzeug.utils import secure_filename
 import cs304dbi as dbi
 
-def save_file(uploaded_file, upload_folder):
+def save_file(f, upload_folder):
     '''Save a file and return its original and stored filenames.'''
     original_name = secure_filename(f.filename)
     # random stored name so that two items with the same file name don't collide
@@ -81,5 +81,4 @@ def add_tags(curs, sid, input_id, tags):
         # link the tag to the item through input_to_tag
         curs.execute('insert into input_to_tag(input_id, tag_id) values (%s, %s)',
             [input_id, tag_id])
-        return
     
