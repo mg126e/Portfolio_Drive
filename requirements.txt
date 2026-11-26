@@ -1,2 +1,6 @@
+Flask
+Werkzeug
+PyMySQL
+passlib
 argon2-cffi
-
+bcrypt

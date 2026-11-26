@@ -198,6 +198,7 @@ def delete_tag():
     if sid is None:
         flash('Please log in to delete tags.')
         return redirect(url_for('home'))
+    return 'Tag deletion is not implemented in this draft.'
 
 
 from datetime import date 
